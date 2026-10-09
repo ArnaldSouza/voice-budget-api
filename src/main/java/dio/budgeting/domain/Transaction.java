@@ -8,13 +8,13 @@ import lombok.Getter;
 public class Transaction {
     private TransactionId id;
     private String description;
-    private long amount;
+    private long amountInCents;
     private Category category;
 
-    public Transaction(String description, long amount, Category category) {
+    public Transaction(String description, long amountInCents, Category category) {
         this.id = new TransactionId();
         this.description = description;
-        this.amount = amount;
+        this.amountInCents = amountInCents;
         this.category = category;
     }
 }

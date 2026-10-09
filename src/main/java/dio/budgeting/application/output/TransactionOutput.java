@@ -12,6 +12,6 @@ public record TransactionOutput(String id, String description, String category, 
                 transaction.getId().uuid().toString(),
                 transaction.getDescription(),
                 transaction.getCategory().name(),
-                BigDecimal.valueOf(transaction.getAmount(), CENTS_SCALE));
+                BigDecimal.valueOf(transaction.getAmountInCents(), CENTS_SCALE));
     }
 }

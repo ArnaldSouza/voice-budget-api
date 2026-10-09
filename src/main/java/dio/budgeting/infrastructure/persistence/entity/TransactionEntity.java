@@ -21,7 +21,7 @@ public class TransactionEntity {
     @Id
     private UUID id;
     private String description;
-    private long amount;
+    private long amountInCents;
 
     @Enumerated(EnumType.STRING)
     private Category category;
@@ -30,7 +30,7 @@ public class TransactionEntity {
         return new TransactionEntity(
                 transaction.getId().uuid(),
                 transaction.getDescription(),
-                transaction.getAmount(),
+                transaction.getAmountInCents(),
                 transaction.getCategory());
     }
 
@@ -38,7 +38,7 @@ public class TransactionEntity {
         return new Transaction(
                 new TransactionId(this.id),
                 this.description,
-                this.amount,
+                this.amountInCents,
                 this.category
         );
     }

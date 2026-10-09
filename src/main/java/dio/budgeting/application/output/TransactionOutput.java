@@ -5,13 +5,11 @@ import dio.budgeting.domain.Transaction;
 import java.math.BigDecimal;
 
 public record TransactionOutput(String id, String description, String category, BigDecimal amountInReais) {
-    private static final int CENTS_SCALE = 2;
-
     public static TransactionOutput from(Transaction transaction) {
         return new TransactionOutput(
                 transaction.getId().uuid().toString(),
                 transaction.getDescription(),
                 transaction.getCategory().name(),
-                BigDecimal.valueOf(transaction.getAmountInCents(), CENTS_SCALE));
+                Money.centsToReais(transaction.getAmountInCents()));
     }
 }

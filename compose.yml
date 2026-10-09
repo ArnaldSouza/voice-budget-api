@@ -16,5 +16,13 @@ services:
       timeout: 5s
       retries: 5
 
+  speech:
+    image: ghcr.io/speaches-ai/speaches:latest-cpu
+    ports:
+      - "8000:8000"
+    volumes:
+      - speech_models:/home/ubuntu/.cache/huggingface/hub
+
 volumes:
   transaction_data:
+  speech_models:

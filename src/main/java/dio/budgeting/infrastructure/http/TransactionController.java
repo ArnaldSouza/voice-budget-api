@@ -14,14 +14,20 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/transactions")
 public class TransactionController {
+    private static final Set<String> SUPPORTED_AUDIO_TYPES = Set.of(
+            "audio/mpeg", "audio/mp4", "audio/x-m4a", "audio/m4a",
+            "audio/wav", "audio/x-wav", "audio/webm", "audio/ogg", "audio/flac");
+
     private final PersistTransactionUseCase persistTransactionUseCase;
     private final ListTransactionsByCategoryUseCase listTransactionsByCategoryUseCase;
 
@@ -59,6 +65,8 @@ public class TransactionController {
 
     @PostMapping(value = "/ai", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = "audio/mp3")
     ResponseEntity<Resource> transcribe(@RequestParam("file") MultipartFile file) {
+        requireSupportedAudio(file);
+
         var userMessage = transcriptionModel.transcribe(file.getResource());
         var result = chatClient.prompt().user(userMessage).call().content();
 
@@ -72,5 +80,15 @@ public class TransactionController {
                                 .build()
                                 .toString())
                 .body(resource);
+    }
+
+    private static void requireSupportedAudio(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Audio file is empty");
+        }
+        var contentType = file.getContentType();
+        if (contentType == null || !SUPPORTED_AUDIO_TYPES.contains(contentType)) {
+            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported audio type");
+        }
     }
 }

@@ -10,6 +10,7 @@ import java.util.List;
 
 @Repository
 public class JpaTransactionRepository implements TransactionRepository {
+
     private final TransactionEntityRepository transactionEntityRepository;
 
     public JpaTransactionRepository(TransactionEntityRepository transactionEntityRepository) {
@@ -28,5 +29,10 @@ public class JpaTransactionRepository implements TransactionRepository {
                 .stream()
                 .map(TransactionEntity::toDomain)
                 .toList();
+    }
+
+    @Override
+    public long sumAmountInCentsByCategory(Category category) {
+        return transactionEntityRepository.sumAmountInCentsByCategory(category);
     }
 }

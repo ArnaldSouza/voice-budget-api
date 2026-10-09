@@ -2,7 +2,9 @@ package dio.budgeting.infrastructure.ai;
 
 import dio.budgeting.application.ListTransactionsByCategoryUseCase;
 import dio.budgeting.application.PersistTransactionUseCase;
+import dio.budgeting.application.SumTransactionsByCategoryUseCase;
 import dio.budgeting.application.input.PersistTransactionInput;
+import dio.budgeting.application.output.CategoryTotalOutput;
 import dio.budgeting.application.output.TransactionOutput;
 import dio.budgeting.domain.Category;
 import org.springframework.ai.tool.annotation.Tool;
@@ -15,11 +17,14 @@ import java.util.List;
 public class TransactionTools {
     private final PersistTransactionUseCase persistTransactionUseCase;
     private final ListTransactionsByCategoryUseCase listTransactionsByCategoryUseCase;
+    private final SumTransactionsByCategoryUseCase sumTransactionsByCategoryUseCase;
 
     public TransactionTools(PersistTransactionUseCase persistTransactionUseCase,
-                            ListTransactionsByCategoryUseCase listTransactionsByCategoryUseCase) {
+                            ListTransactionsByCategoryUseCase listTransactionsByCategoryUseCase,
+                            SumTransactionsByCategoryUseCase sumTransactionsByCategoryUseCase) {
         this.persistTransactionUseCase = persistTransactionUseCase;
         this.listTransactionsByCategoryUseCase = listTransactionsByCategoryUseCase;
+        this.sumTransactionsByCategoryUseCase = sumTransactionsByCategoryUseCase;
     }
 
     @Tool(name = "persist-transaction", description = "Persiste uma nova transação financeira")
@@ -34,5 +39,11 @@ public class TransactionTools {
     public List<TransactionOutput> listTransactionsByCategory(
             @ToolParam(description = "Categoria da transação") Category category) {
         return listTransactionsByCategoryUseCase.execute(category);
+    }
+
+    @Tool(name = "sum-transactions-by-category", description = "Calcula o total gasto em uma categoria")
+    public CategoryTotalOutput sumTransactionsByCategory(
+            @ToolParam(description = "Categoria da transação") Category category) {
+        return sumTransactionsByCategoryUseCase.execute(category);
     }
 }

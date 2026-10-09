@@ -5,6 +5,7 @@ import dio.budgeting.application.PersistTransactionUseCase;
 import dio.budgeting.domain.Category;
 import dio.budgeting.infrastructure.http.request.TransactionRequest;
 import dio.budgeting.infrastructure.http.response.TransactionResponse;
+import dio.budgeting.infrastructure.ai.TransactionTools;
 import org.springframework.ai.audio.transcription.TranscriptionModel;
 import org.springframework.ai.audio.tts.TextToSpeechModel;
 import org.springframework.ai.chat.client.ChatClient;
@@ -15,6 +16,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -24,6 +26,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/transactions")
 public class TransactionController {
+
     private static final Set<String> SUPPORTED_AUDIO_TYPES = Set.of(
             "audio/mpeg", "audio/mp4", "audio/x-m4a", "audio/m4a",
             "audio/wav", "audio/x-wav", "audio/webm", "audio/ogg", "audio/flac");
@@ -36,17 +39,19 @@ public class TransactionController {
     private final TextToSpeechModel textToSpeechModel;
 
     public TransactionController(PersistTransactionUseCase persistTransactionUseCase,
-                                 ListTransactionsByCategoryUseCase listTransactionsByCategoryUseCase,
-                                 TranscriptionModel transcriptionModel,
-                                 @Value("classpath:prompts/system-message.st") Resource systemPrompt,
-                                 ChatClient.Builder chatClientBuilder,
-                                 TextToSpeechModel textToSpeechModel) throws IOException {
+            ListTransactionsByCategoryUseCase listTransactionsByCategoryUseCase,
+            TransactionTools transactionTools,
+            TranscriptionModel transcriptionModel,
+            @Value("classpath:prompts/system-message.st") Resource systemPrompt,
+            ChatClient.Builder chatClientBuilder,
+            TextToSpeechModel textToSpeechModel) throws IOException {
         this.persistTransactionUseCase = persistTransactionUseCase;
         this.listTransactionsByCategoryUseCase = listTransactionsByCategoryUseCase;
         this.transcriptionModel = transcriptionModel;
         this.chatClient = chatClientBuilder
                 .defaultSystem(systemPrompt.getContentAsString(Charset.defaultCharset()))
-                .defaultTools(persistTransactionUseCase, listTransactionsByCategoryUseCase)
+                .defaultTools(transactionTools)
+                .defaultAdvisors(new SimpleLoggerAdvisor())
                 .build();
         this.textToSpeechModel = textToSpeechModel;
     }

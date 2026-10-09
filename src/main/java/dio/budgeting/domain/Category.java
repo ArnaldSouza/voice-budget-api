@@ -4,4 +4,5 @@ public enum Category {
     GROCERIES,
     PHARMA,
     AUTO,
+    OTHER,
 }

@@ -2,8 +2,6 @@ package dio.budgeting.domain;
 
 import lombok.Getter;
 
-import java.util.Objects;
-
 @Getter
 public class Transaction {
     private final TransactionId id;
@@ -16,22 +14,29 @@ public class Transaction {
     }
 
     public Transaction(TransactionId id, String description, long amountInCents, Category category) {
-        this.id = Objects.requireNonNull(id, "Transaction id is required");
+        this.id = requirePresent(id, "Transaction id is required");
         this.description = requireNonBlank(description);
         this.amountInCents = requirePositive(amountInCents);
-        this.category = Objects.requireNonNull(category, "Transaction category is required");
+        this.category = requirePresent(category, "Transaction category is required");
+    }
+
+    private static <T> T requirePresent(T value, String message) {
+        if (value == null) {
+            throw new InvalidTransactionException(message);
+        }
+        return value;
     }
 
     private static String requireNonBlank(String description) {
         if (description == null || description.isBlank()) {
-            throw new IllegalArgumentException("Transaction description must not be blank");
+            throw new InvalidTransactionException("Transaction description must not be blank");
         }
         return description.strip();
     }
 
     private static long requirePositive(long amountInCents) {
         if (amountInCents <= 0) {
-            throw new IllegalArgumentException("Transaction amount must be greater than zero");
+            throw new InvalidTransactionException("Transaction amount must be greater than zero");
         }
         return amountInCents;
     }
